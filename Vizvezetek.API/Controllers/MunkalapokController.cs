@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Vizvezetek.API.DTos;
 using Vizvezetek.API.Models;
 using Vizvezetek.API.Helpers;
+using Vizvezetek.API.Dtos;
 
 namespace Vizvezetek.API.Controllers
 {
@@ -45,38 +46,38 @@ namespace Vizvezetek.API.Controllers
             return Ok(MunkalapMapper.ToDto(munkalap));
         }
 
-        // POST api/Munkalapok
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] munkalap munkalap)
+        // GET api/Munkalapok/kereses?helyId=3&szereloId=7
+        [HttpGet("kereses")]
+        public async Task<IActionResult> KeresesViaUrl([FromQuery] int helyId, [FromQuery] int szereloId)
         {
-            _context.munkalap.Add(munkalap);
-            await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetById), new { id = munkalap.id }, munkalap);
+            var ids = await _context.munkalap
+                .Where(m => m.hely_id == helyId && m.szerelo_id == szereloId)
+                .Select(m => m.id)
+                .ToListAsync();
+
+            if (!ids.Any())
+                return NotFound("Nincs ilyen munkalap.");
+
+            return Ok(ids);
         }
-
-        // PUT api/Munkalapok/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] munkalap munkalap)
+        
+        // GET api/Munkalapok/ev/2002
+        [HttpGet("ev/{evszam}")]
+        public async Task<IActionResult> GetLezartMunkalapokByEv(int evszam)
         {
-            if (id != munkalap.id)
-                return BadRequest();
+            var munkalapok = await _context.munkalap
+                .Include(m => m.hely)
+                .Include(m => m.szerelo)
+                .Where(m => m.javitas_datum != null &&
+                            m.javitas_datum.Year == evszam)
+                .ToListAsync();
 
-            _context.Entry(munkalap).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
+            if (!munkalapok.Any())
+                return NotFound($"Nincs lezárt munkalap a(z) {evszam}-es évben.");
 
-        // DELETE api/Munkalapok/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int id)
-        {
-            var munkalap = await _context.munkalap.FindAsync(id);
-            if (munkalap == null)
-                return NotFound();
+            var dtos = munkalapok.Select(m => MunkalapMapper.ToDto(m));
 
-            _context.munkalap.Remove(munkalap);
-            await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(dtos);
         }
     }
 }
