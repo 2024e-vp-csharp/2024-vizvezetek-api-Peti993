@@ -1,0 +1,65 @@
+﻿@model IEnumerable<Vizvezetek.API.Models.munkalap>
+
+@{
+    ViewData["Title"] = "Index";
+}
+
+<h1>Index</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.beadas_datum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.javitas_datum)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.munkaora)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.anyagar)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.hely)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.szerelo)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+@foreach (var item in Model) {
+        <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.beadas_datum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.javitas_datum)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.munkaora)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.anyagar)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.hely.id)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.szerelo.id)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.id">Delete</a>
+            </td>
+        </tr>
+}
+    </tbody>
+</table>
